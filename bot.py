@@ -16,8 +16,28 @@ class Bot(twitchio.Client):
         )
 
     # Defining some variables
-    Messages=[]
+    Channels={}
     TmpReplaceWord=os.getenv("STARTWORD")
+
+    def AddMessageToStack(self, Message):
+            if Message.channel.name not in self.Channels:
+                self.Channels[Message.channel.name]={
+                    "Word": os.getenv("STARTWORD"),
+                    "Messages": []
+                }
+            self.Channels[Message.channel.name]["Messages"].append(Message.content)
+
+    def ChangeChannelWord(self, Message):
+                if Message.channel.name not in self.Channels:
+                    self.Channels[Message.channel.name]={
+                        "Word": os.getenv("STARTWORD"),
+                        "Messages": []
+                    }
+                SetWord = re.search("^\!setword ([\w\!\+\-\_\d]*)", Message.content)
+                if SetWord:
+                    self.Channels[Message.channel.name]["Word"]=SetWord.group(1)
+                    return self.Channels[Message.channel.name]["Word"]
+                    
 
     async def event_ready(self):
         print(f"{self.nick} Hopped in to chat")
@@ -47,25 +67,22 @@ class Bot(twitchio.Client):
         elif Message.content.startswith("!setword"):
             # Only a mod is allowed to do this
             if Message.author.is_mod:
-                SetWord = re.search("^\!setword ([\w\!\+\-\_\d]*)", Message.content)
-                if SetWord:
-                    self.TmpReplaceWord=SetWord.group(1)
-                    await Message.channel.send(f"Word has been changed into: {self.TmpReplaceWord}")
+                await Message.channel.send("Word has been changed into: "+self.ChangeChannelWord(Message))
 
         # Ignoring all commands, preventing them to be added into the message list
         elif Message.content.startswith("!"):
             return
         # If everything has been done, lets add the message into the list
         else:
-            self.Messages.append(Message.content)
+            self.AddMessageToStack(Message)
 
         # After the list has been filled with atleast
-        if len(self.Messages) > 5 :
+        if len(self.Channels[Message.channel.name]["Messages"]) > 5 :
             if random.randint(0, 5) == 1:
-                SelectedMsg = random.choice(self.Messages)
+                SelectedMsg = random.choice(self.Channels[Message.channel.name]["Messages"])
                 Words = SelectedMsg.split()
                 RdmWord = random.randint(0,len(Words) -1)
-                Words[RdmWord] = self.TmpReplaceWord
+                Words[RdmWord] = self.Channels[Message.channel.name]["Word"]
                 NewMsg = " ".join(Words)
                 await Message.channel.send(NewMsg)
-                self.Messages.clear()
+                self.Channels[Message.channel.name]["Messages"].clear()
