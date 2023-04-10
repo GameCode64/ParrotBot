@@ -1,0 +1,5 @@
+# Required libraries
+twitchio
+python-dotenv
+requests
+mysql-connector-python

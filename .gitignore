@@ -1,0 +1,5 @@
+.env
+./__pycache__
+./_pycache_
+__pycache__/bot.cpython-311.pyc
+__pycache__/
