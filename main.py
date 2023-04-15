@@ -12,4 +12,10 @@ bot = Bot(
     Initial_Channels=["#GameCode64", "#b1g_b00ty_"]
 )
 
-bot.run()
+while True:
+    try:
+        bot.run()
+    except:
+        pass
+    else:
+        break
