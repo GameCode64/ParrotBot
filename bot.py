@@ -98,7 +98,19 @@ class Bot(twitchio.Client):
                     case 5:
                         return (f"Do you think i'm just a bot to talk to?")
 
+    def ReplaceWord(self, Message, Words):
+        Words = Words
+        RdmWord = random.randint(0,len(Words) -1)
 
+        if (random.randint(1,5) == 1):
+            RdmLetterStart = random.randint(0, len(Words[RdmWord]))
+            RdmLetterEnd = random.randint(RdmLetterStart, len(Words[RdmWord]))
+            Words[RdmWord] = Words[RdmWord][:RdmLetterStart] + self.Channels[Message.channel.name]["Word"] + Words[RdmWord][RdmLetterEnd:]
+        else:
+            Words[RdmWord] = self.Channels[Message.channel.name]["Word"]
+        Words = " ".join(Words)
+        return Words
+    
     async def event_ready(self):
         print("Loading settings per channel")
         for File in os.listdir("settings"):
@@ -123,7 +135,7 @@ class Bot(twitchio.Client):
             if not ChannelStatus:
                 return
             else:
-                if not ExtraFunctions.CheckStreamIsLive(Message.channel.name.lower()).publication["isLiveBroadcast"]:
+                if not ChannelStatus["publication"]["isLiveBroadcast"]:
                     return
 
         # Ignore messages sent by the bot itself
@@ -151,6 +163,11 @@ class Bot(twitchio.Client):
         elif Message.content.lower().find("bootybot no") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             await Message.channel.send("D:")
 
+        # Just an easter egg for Ghunzor's channel
+        elif Message.content.lower().find("boo! scary") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
+            if(Message.channel.name.lower() == "ghunzor"):
+                await Message.channel.send("!scary")
+
         # Giving a reaction someone that is talking about bootybot
         elif Message.content.lower().find("bootybot") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             if not self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]:
@@ -163,7 +180,6 @@ class Bot(twitchio.Client):
                 await Message.channel.send(f"Hi {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
-
 
 
         # Moderating the word to replace in the message
@@ -210,21 +226,37 @@ class Bot(twitchio.Client):
         if self.Channels[Message.channel.name]["Settings"]["Messaging"].lower() == "listed":
             if len(self.Channels[Message.channel.name]["Messages"]) > 5 :
                 if random.randint(1, int(self.Channels[Message.channel.name]["Settings"]["Chance_Rate"])) == 1: # chance rating
-                    SelectedMsg = random.choice(self.Channels[Message.channel.name]["Messages"])
-                    Words = SelectedMsg.split()
-                    RdmWord = random.randint(0,len(Words) -1)
-                    Words[RdmWord] = self.Channels[Message.channel.name]["Word"]
-                    NewMsg = " ".join(Words)
-                    await Message.channel.send(NewMsg)
+                    SelectedMsg = Message.content
+                    WordsLeng = len(SelectedMsg.split())
+                    #place while here to loop through each word
+                    if (random.randint(1,2) == 1):
+                        ConvWords = 0
+                        while ((100 / WordsLeng * ConvWords < 40 )):
+                            ConvWords = ConvWords + 1
+                            Words = SelectedMsg.split()
+                            SelectedMsg = self.ReplaceWord(Message, Words)
+                    #end while loop here
+                    else:
+                        Words = SelectedMsg.split()
+                        SelectedMsg = self.ReplaceWord(Message, Words)
+                    await Message.channel.send(SelectedMsg)
                     self.Channels[Message.channel.name]["Messages"].clear()
 
         # If messaging is set to direct we just apply the gods of RNG to capture a random message
         elif self.Channels[Message.channel.name]["Settings"]["Messaging"].lower() == "direct":
-                if len(Message.content.split()) > 2:
-                    if random.randint(1, int(self.Channels[Message.channel.name]["Settings"]["Chance_Rate"])) == 1: # chance rating
-                        SelectedMsg = Message.content
+            if len(Message.content.split()) > 2:
+                if random.randint(1, int(self.Channels[Message.channel.name]["Settings"]["Chance_Rate"])) == 1: # chance rating
+                    SelectedMsg = Message.content
+                    WordsLeng = len(SelectedMsg.split())
+                    #place while here to loop through each word
+                    if (random.randint(1,2) == 1):
+                        ConvWords = 0
+                        while ((100 / WordsLeng * ConvWords < 40 )):
+                            ConvWords = ConvWords + 1
+                            Words = SelectedMsg.split()
+                            SelectedMsg = self.ReplaceWord(Message, Words)
+                    #end while loop here
+                    else:
                         Words = SelectedMsg.split()
-                        RdmWord = random.randint(0,len(Words) -1)
-                        Words[RdmWord] = self.Channels[Message.channel.name]["Word"]
-                        NewMsg = " ".join(Words)
-                        await Message.channel.send(NewMsg)
+                        SelectedMsg = self.ReplaceWord(Message, Words)
+                    await Message.channel.send(SelectedMsg)

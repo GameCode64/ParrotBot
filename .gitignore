@@ -4,3 +4,4 @@
 __pycache__/bot.cpython-311.pyc
 __pycache__/
 settings/*.json
+*.log
