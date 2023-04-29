@@ -58,15 +58,21 @@ class Bot(twitchio.Client):
             self.SaveChannelJson(Message)
             return self.Channels[Message.channel.name]["Word"]
 
-    def AddNameToIgnore(self, Message):
-        IgnoreName = re.search("^\!ignorename (.+)", Message.content.lower())
-        if IgnoreName:
-            if IgnoreName.group(1) not in self.Channels[Message.channel.name]["Ignore_Names"]:
-                self.Channels[Message.channel.name]["Ignore_Names"].append(IgnoreName.group(1))
-                self.SaveChannelJson(Message)
-                return IgnoreName.group(1)
-            else:
-                return f"{IgnoreName.group(1)} already"
+    def AddNameToIgnore(self, Message, User = False):
+        if ( not User):
+            IgnoreName = re.search("^\!ignorename (.+)", Message.content.lower())
+            if IgnoreName:
+                if IgnoreName.group(1) not in self.Channels[Message.channel.name]["Ignore_Names"]:
+                    self.Channels[Message.channel.name]["Ignore_Names"].append(IgnoreName.group(1))
+                    self.SaveChannelJson(Message)
+                    return IgnoreName.group(1)
+                else:
+                    return f"{IgnoreName.group(1)} already"
+        else:
+            if User not in self.Channels[Message.channel.name]["Ignore_Names"]:
+                    self.Channels[Message.channel.name]["Ignore_Names"].append(User)
+                    self.SaveChannelJson(Message)
+                    return User
 
     def DelNameFromIgnore(self, Message):
         UnignoreName = re.search("^\!unignorename (.+)", Message.content.lower())
@@ -174,13 +180,18 @@ class Bot(twitchio.Client):
                 await Message.channel.send(f"Hi {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
-               
+    
         elif Message.content.lower().find("b1g_b00ty") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             if not self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]:
                 await Message.channel.send(f"Hi {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
-
+         
+        # Ignoring the crybabies
+        elif Message.content.startswith("!ignoremenowandforeverhere"):
+            # Only a streamer is allowed to do this
+            self.AddNameToIgnore(Message, Message.author.name)
+            await Message.channel.send(f"!ban {Message.author.name} has been added to the ignore list!")
 
         # Moderating the word to replace in the message
         elif Message.content.startswith("!setword"):
@@ -235,6 +246,8 @@ class Bot(twitchio.Client):
                             ConvWords = ConvWords + 1
                             Words = SelectedMsg.split()
                             SelectedMsg = self.ReplaceWord(Message, Words)
+                            if (random.randint(1,5)):
+                                break
                     #end while loop here
                     else:
                         Words = SelectedMsg.split()
@@ -255,6 +268,8 @@ class Bot(twitchio.Client):
                             ConvWords = ConvWords + 1
                             Words = SelectedMsg.split()
                             SelectedMsg = self.ReplaceWord(Message, Words)
+                            if (random.randint(1,5)):
+                                break
                     #end while loop here
                     else:
                         Words = SelectedMsg.split()
