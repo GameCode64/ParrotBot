@@ -108,7 +108,7 @@ class Bot(twitchio.Client):
         Words = Words
         RdmWord = random.randint(0,len(Words) -1)
 
-        if (random.randint(1,5) == 1):
+        if (random.randint(1,3) == 1):
             RdmLetterStart = random.randint(0, len(Words[RdmWord]))
             RdmLetterEnd = random.randint(RdmLetterStart, len(Words[RdmWord]))
             Words[RdmWord] = Words[RdmWord][:RdmLetterStart] + self.Channels[Message.channel.name]["Word"] + Words[RdmWord][RdmLetterEnd:]
