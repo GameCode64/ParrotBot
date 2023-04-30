@@ -92,17 +92,17 @@ class Bot(twitchio.Client):
             return self.Channels[Message.channel.name]["Settings"]["Chance_Rate"]
 
     def DegenResponse(self, Message):
-         match random.randint(1,5):
-                    case 1:
-                       return (f"What do you want {Message.author.name}?")
-                    case 2:
-                        return (f"{Message.author.name} What is your problem?")
-                    case 3:
-                        return (f"Are you going to tell on me?")
-                    case 4:
-                        return (f"You summoned me {Message.author.name}?")
-                    case 5:
-                        return (f"Do you think i'm just a bot to talk to?")
+        match random.randint(1,5):
+            case 1:
+               return (f"What do you want {Message.author.name}?")
+            case 2:
+                return (f"{Message.author.name} What is your problem?")
+            case 3:
+                return (f"Are you going to tell on me?")
+            case 4:
+                return (f"You summoned me {Message.author.name}?")
+            case 5:
+                return (f"Do you think i'm just a bot to talk to?")
 
     def ReplaceWord(self, Message, Words):
         Words = Words
