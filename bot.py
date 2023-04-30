@@ -70,9 +70,9 @@ class Bot(twitchio.Client):
                     return f"{IgnoreName.group(1)} already"
         else:
             if User not in self.Channels[Message.channel.name]["Ignore_Names"]:
-                    self.Channels[Message.channel.name]["Ignore_Names"].append(User)
-                    self.SaveChannelJson(Message)
-                    return User
+                self.Channels[Message.channel.name]["Ignore_Names"].append(User)
+                self.SaveChannelJson(Message)
+                return User
 
     def DelNameFromIgnore(self, Message):
         UnignoreName = re.search("^\!unignorename (.+)", Message.content.lower())
@@ -107,7 +107,6 @@ class Bot(twitchio.Client):
     def ReplaceWord(self, Message, Words):
         Words = Words
         RdmWord = random.randint(0,len(Words) -1)
-
         if (random.randint(1,3) == 1):
             RdmLetterStart = random.randint(0, len(Words[RdmWord]))
             RdmLetterEnd = random.randint(RdmLetterStart, len(Words[RdmWord]))
