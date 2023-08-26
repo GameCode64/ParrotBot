@@ -1,10 +1,10 @@
-# Bit Booties Bot
+# WordBenderBot
 This bot will take viewers their messages on twitch and modifies it to its likings.
 
 ## Commands
 
 To change the replacing word (Default is "booty"):
- - !setword booty
+ - !setword bend
  - - Rights: Streamer & moderator
 
 To change the chance of trigger (Default is 1:5):
