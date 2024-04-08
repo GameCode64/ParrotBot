@@ -19,12 +19,12 @@ class Bot(twitchio.Client):
 
          # Defining some variables
     Channels={}
-    HelloSenteces=["hello booty","hello bootybot","hello @b1g_b00ty","hello b1g_b00ty","hello bigbooty","hello big booty"]
+    HelloSenteces=["hello bender","hello wordbender","hello benderbot","hello wordbenderbot","hello @bender","hello @wordbender","hello @benderbot","hello @wordbenderbot", "alo benderbot", "alo wordbenderbot", "alo wordbender", "benderbot alo", "wordbenderbot alo", "wordbender alo"]
     TmpReplaceWord=os.getenv("STARTWORD")
 
     def InitiateChannel(self, _Message):
-        if _Message.channel.name not in self.Channels:
-            self.Channels[_Message.channel.name]={
+        if _Message.channel.name.lower() not in self.Channels:
+            self.Channels[_Message.channel.name.lower()]={
                 "Word": os.getenv("STARTWORD"),
                 "Messages": [],
                 "Ignore_Names": [],
@@ -38,47 +38,47 @@ class Bot(twitchio.Client):
         self.SaveChannelJson(_Message)
 
     def SaveChannelJson(self, Message):
-        with open(f"settings/{Message.channel.name}.json", "w") as OutFile:
-            OutFile.write(json.dumps(self.Channels[Message.channel.name]))
+        with open(f"settings/{Message.channel.name.lower()}.json", "w") as OutFile:
+            OutFile.write(json.dumps(self.Channels[Message.channel.name.lower()]))
 
     # Adding the messages up to the stack
     def AddMessageToStack(self, Message):
-        if Message.author.name.lower() in self.Channels[Message.channel.name]["Ignore_Names"]:
+        if Message.author.name.lower() in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
             return
         self.SaveChannelJson(Message)
-        if len(Message.content.split()) > 3 and self.Channels[Message.channel.name]["Settings"]["Messaging"].lower() == "listed":
-            self.Channels[Message.channel.name]["Messages"].append(Message.content)
+        if len(Message.content.split()) > 3 and self.Channels[Message.channel.name.lower()]["Settings"]["Messaging"].lower() == "listed":
+            self.Channels[Message.channel.name.lower()]["Messages"].append(Message.content)
             
 
     # Changing the word per channel as requested
     def ChangeChannelWord(self, Message):
         SetWord = re.search("^\!setword ([\w\!\+\-\_\d]+)", Message.content)
         if SetWord:
-            self.Channels[Message.channel.name]["Word"]=SetWord.group(1)
+            self.Channels[Message.channel.name.lower()]["Word"]=SetWord.group(1)
             self.SaveChannelJson(Message)
-            return self.Channels[Message.channel.name]["Word"]
+            return self.Channels[Message.channel.name.lower()]["Word"]
 
     def AddNameToIgnore(self, Message, User = False):
         if ( not User):
             IgnoreName = re.search("^\!ignorename (.+)", Message.content.lower())
             if IgnoreName:
-                if IgnoreName.group(1) not in self.Channels[Message.channel.name]["Ignore_Names"]:
-                    self.Channels[Message.channel.name]["Ignore_Names"].append(IgnoreName.group(1))
+                if IgnoreName.group(1) not in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
+                    self.Channels[Message.channel.name.lower()]["Ignore_Names"].append(IgnoreName.group(1))
                     self.SaveChannelJson(Message)
                     return IgnoreName.group(1)
                 else:
                     return f"{IgnoreName.group(1)} already"
         else:
-            if User not in self.Channels[Message.channel.name]["Ignore_Names"]:
-                    self.Channels[Message.channel.name]["Ignore_Names"].append(User)
+            if User not in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
+                    self.Channels[Message.channel.name.lower()]["Ignore_Names"].append(User)
                     self.SaveChannelJson(Message)
                     return User
 
     def DelNameFromIgnore(self, Message):
         UnignoreName = re.search("^\!unignorename (.+)", Message.content.lower())
         if UnignoreName:
-            if UnignoreName.group(1) in self.Channels[Message.channel.name]["Ignore_Names"]:
-                self.Channels[Message.channel.name]["Ignore_Names"].remove(UnignoreName.group(1))
+            if UnignoreName.group(1) in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
+                self.Channels[Message.channel.name.lower()]["Ignore_Names"].remove(UnignoreName.group(1))
                 self.SaveChannelJson(Message)
                 return UnignoreName.group(1)
             else:
@@ -87,9 +87,9 @@ class Bot(twitchio.Client):
     def ChangeChance(self, Message):
         ChangeRate = re.search("^\!setchance (\d+)", Message.content)
         if ChangeRate:
-            self.Channels[Message.channel.name]["Settings"]["Chance_Rate"]=ChangeRate.group(1)
+            self.Channels[Message.channel.name.lower()]["Settings"]["Chance_Rate"]=ChangeRate.group(1)
             self.SaveChannelJson(Message)
-            return self.Channels[Message.channel.name]["Settings"]["Chance_Rate"]
+            return self.Channels[Message.channel.name.lower()]["Settings"]["Chance_Rate"]
 
     def DegenResponse(self, Message):
          match random.randint(1,5):
@@ -111,9 +111,9 @@ class Bot(twitchio.Client):
         if (random.randint(1,3) == 1):
             RdmLetterStart = random.randint(0, len(Words[RdmWord]))
             RdmLetterEnd = random.randint(RdmLetterStart, len(Words[RdmWord]))
-            Words[RdmWord] = Words[RdmWord][:RdmLetterStart] + self.Channels[Message.channel.name]["Word"] + Words[RdmWord][RdmLetterEnd:]
+            Words[RdmWord] = Words[RdmWord][:RdmLetterStart] + self.Channels[Message.channel.name.lower()]["Word"] + Words[RdmWord][RdmLetterEnd:]
         else:
-            Words[RdmWord] = self.Channels[Message.channel.name]["Word"]
+            Words[RdmWord] = self.Channels[Message.channel.name.lower()]["Word"]
         Words = " ".join(Words)
         return Words
     
@@ -128,16 +128,17 @@ class Bot(twitchio.Client):
                 print(self.Channels[Channel])
         print(f"{self.nick} Hopped in to chat")
 
+
     async def event_message(self, Message):
 
         # Initating Channel
         self.InitiateChannel(Message)
 
         # Getting channel status
-        ChannelStatus=ExtraFunctions.CheckStreamIsLive(Message.channel.name.lower())
+        ChannelStatus=ExtraFunctions.CheckStreamIsLive(Message.channel.name.lower().lower())
 
         # If requested don't react if channel is offline
-        if not self.Channels[Message.channel.name]["Settings"]["Ignore_Offline"]:
+        if not self.Channels[Message.channel.name.lower()]["Settings"]["Ignore_Offline"]:
             if not ChannelStatus:
                 return
             else:
@@ -147,43 +148,39 @@ class Bot(twitchio.Client):
         # Ignore messages sent by the bot itself
         if Message.echo:
             return
-
+        
         # ungnoring the filled name because the steamer do want this one to echo
         elif Message.content.startswith("!unignorename"):
             # Only a mod is allowed to do this
             if Message.author.is_broadcaster:
                 await Message.channel.send(f"{self.DelNameFromIgnore(Message)} has been removed from the ignore list!")
 
-        if Message.author.name in self.Channels[Message.channel.name]["Ignore_Names"]:
+        if Message.author.name in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
             return
 
-        # Giving a reaction to hello booty
+        # Giving a reaction to hello benderbot
         if Message.content.lower().startswith(tuple(self.HelloSenteces)):
-            await Message.channel.send(f"Hello big butted {Message.author.name}!")
+            await Message.channel.send(f"ALO {Message.author.name}!")
 
-        # Giving a reaction to bootybot yes
-        elif Message.content.lower().find("bootybot yes") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
+        # Giving a reaction to benderbot yes
+        elif Message.content.lower().find("benderbot yes") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             await Message.channel.send(":D")
 
-        # Giving a reaction to bootybot no
-        elif Message.content.lower().find("bootybot no") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
+        # Giving a reaction to benderbot no
+        elif Message.content.lower().find("benderbot no") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             await Message.channel.send("D:")
 
-        # Just an easter egg for Ghunzor's channel
-        elif Message.content.lower().find("boo! scary") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
-            if(Message.channel.name.lower() == "ghunzor"):
-                await Message.channel.send("!scary")
-
-        # Giving a reaction someone that is talking about bootybot
-        elif Message.content.lower().find("bootybot") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
-            if not self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]:
-                await Message.channel.send(f"Hi {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
+        # Giving a reaction someone that is talking about benderbot
+        elif Message.content.lower().find("benderbot") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
+            if not self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"]:
+                await Message.channel.send(f"ALO {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist. ")
+                # await Message.channel.send(f"ALO {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist. 00100100")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
     
-        elif Message.content.lower().find("b1g_b00ty") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
-            if not self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]:
-                await Message.channel.send(f"Hi {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
+        elif Message.content.lower().find("wordbenderbot") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
+            if not self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"]:
+                await Message.channel.send(f"ALO {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
          
@@ -191,7 +188,7 @@ class Bot(twitchio.Client):
         elif Message.content.startswith("!ignoremenowandforeverhere"):
             # Only a streamer is allowed to do this
             self.AddNameToIgnore(Message, Message.author.name)
-            await Message.channel.send(f"!ban {Message.author.name} has been added to the ignore list!")
+            await Message.channel.send(f"/block {Message.author.name}")
 
         # Moderating the word to replace in the message
         elif Message.content.startswith("!setword"):
@@ -202,29 +199,29 @@ class Bot(twitchio.Client):
         # Moderating the chance rate
         elif Message.content.startswith("!setchance"):
             # Only a streamer is allowed to do this
-            if Message.author.is_broadcaster:
+            if Message.author.is_broadcaster or Message.author.name.lower() == "gamecode64":
                 Number=int(self.ChangeChance(Message))
                 await Message.channel.send(f"The chance rate has been changed to 1:{Number}")
 
         # Ignoring the filled name because the steamer doesn't want this one to echo
         elif Message.content.startswith("!ignorename"):
             # Only a streamer is allowed to do this
-            if Message.author.is_broadcaster:
+            if Message.author.is_broadcaster or Message.author.name.lower() == "gamecode64":
                 await Message.channel.send(f"{self.AddNameToIgnore(Message)} has been added to the ignore list!")
 
         # toggling offlinechatmode
         elif Message.content.startswith("!toggleofflinemode"):
             # Only a streamer is allowed to do this
             if Message.author.is_broadcaster:
-                self.Channels[Message.channel.name]["Settings"]["Ignore_Offline"] = not self.Channels[Message.channel.name]["Settings"]["Ignore_Offline"]
-                await Message.channel.send(f"""Chat offline mode is: {self.Channels[Message.channel.name]["Settings"]["Ignore_Offline"]}""")
+                self.Channels[Message.channel.name.lower()]["Settings"]["Ignore_Offline"] = not self.Channels[Message.channel.name.lower()]["Settings"]["Ignore_Offline"]
+                await Message.channel.send(f"""Chat offline mode is: {self.Channels[Message.channel.name.lower()]["Settings"]["Ignore_Offline"]}""")
 
         # toggling offlinechatmode
         elif Message.content.startswith("!toggledegenmode"):
             # Only a streamer is allowed to do this
             if Message.author.is_broadcaster:
-                self.Channels[Message.channel.name]["Settings"]["Degen_Mode"] = not self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]
-                await Message.channel.send(f"""Degen mode is: {self.Channels[Message.channel.name]["Settings"]["Degen_Mode"]}""")
+                self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"] = not self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"]
+                await Message.channel.send(f"""Degen mode is: {self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"]}""")
 
         # Ignoring all commands, preventing them to be added into the message list
         elif Message.content.startswith("!"):
@@ -234,9 +231,9 @@ class Bot(twitchio.Client):
             self.AddMessageToStack(Message)
 
         # After the list has been filled with atleast if messaging is set to listed
-        if self.Channels[Message.channel.name]["Settings"]["Messaging"].lower() == "listed":
-            if len(self.Channels[Message.channel.name]["Messages"]) > 5 :
-                if random.randint(1, int(self.Channels[Message.channel.name]["Settings"]["Chance_Rate"])) == 1: # chance rating
+        if self.Channels[Message.channel.name.lower()]["Settings"]["Messaging"].lower() == "listed":
+            if len(self.Channels[Message.channel.name.lower()]["Messages"]) > 5 :
+                if random.randint(1, int(self.Channels[Message.channel.name.lower()]["Settings"]["Chance_Rate"])) == 1: # chance rating
                     SelectedMsg = Message.content
                     WordsLeng = len(SelectedMsg.split())
                     #place while here to loop through each word
@@ -253,22 +250,24 @@ class Bot(twitchio.Client):
                         Words = SelectedMsg.split()
                         SelectedMsg = self.ReplaceWord(Message, Words)
                     await Message.channel.send(SelectedMsg)
-                    self.Channels[Message.channel.name]["Messages"].clear()
+                    self.Channels[Message.channel.name.lower()]["Messages"].clear()
 
         # If messaging is set to direct we just apply the gods of RNG to capture a random message
-        elif self.Channels[Message.channel.name]["Settings"]["Messaging"].lower() == "direct":
+        elif self.Channels[Message.channel.name.lower()]["Settings"]["Messaging"].lower() == "direct":
             if len(Message.content.split()) > 2:
-                if random.randint(1, int(self.Channels[Message.channel.name]["Settings"]["Chance_Rate"])) == 1: # chance rating
+                if random.randint(1, int(self.Channels[Message.channel.name.lower()]["Settings"]["Chance_Rate"])) == 1: # chance rating
                     SelectedMsg = Message.content
+                    if Message.content.lower().find("cancer") != -1:
+                        return
                     WordsLeng = len(SelectedMsg.split())
                     #place while here to loop through each word
                     if (random.randint(1,2) == 1):
                         ConvWords = 0
-                        while ((100 / WordsLeng * ConvWords < 40 )):
+                        while ((100 / WordsLeng * ConvWords < 30 )):
                             ConvWords = ConvWords + 1
                             Words = SelectedMsg.split()
                             SelectedMsg = self.ReplaceWord(Message, Words)
-                            if (random.randint(1,5)):
+                            if (random.randint(1,5) == 2):
                                 break
                     #end while loop here
                     else:
