@@ -3,7 +3,7 @@ This bot will take viewers their messages on twitch and modifies it to its likin
 
 ## Commands
 
-To change the replacing word (Default is "booty"):
+To change the replacing word (Default is "bend"):
  - !setword bend
  - - Rights: Streamer & moderator
 
