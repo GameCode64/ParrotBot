@@ -48,7 +48,7 @@ class Bot(twitchio.Client):
         self.SaveChannelJson(Message)
         if len(Message.content.split()) > 3 and self.Channels[Message.channel.name.lower()]["Settings"]["Messaging"].lower() == "listed":
             self.Channels[Message.channel.name.lower()]["Messages"].append(Message.content)
-            
+
 
     # Changing the word per channel as requested
     def ChangeChannelWord(self, Message):
@@ -116,7 +116,7 @@ class Bot(twitchio.Client):
             Words[RdmWord] = self.Channels[Message.channel.name.lower()]["Word"]
         Words = " ".join(Words)
         return Words
-    
+
     async def event_ready(self):
         print("Loading settings per channel")
         for File in os.listdir("settings"):
@@ -137,6 +137,8 @@ class Bot(twitchio.Client):
         # Getting channel status
         ChannelStatus=ExtraFunctions.CheckStreamIsLive(Message.channel.name.lower().lower())
 
+  #      print(Message.content)
+
         # If requested don't react if channel is offline
         if not self.Channels[Message.channel.name.lower()]["Settings"]["Ignore_Offline"]:
             if not ChannelStatus:
@@ -145,10 +147,11 @@ class Bot(twitchio.Client):
                 if not ChannelStatus["publication"]["isLiveBroadcast"]:
                     return
 
+        #print(Message.content)
         # Ignore messages sent by the bot itself
         if Message.echo:
             return
-        
+
         # ungnoring the filled name because the steamer do want this one to echo
         elif Message.content.startswith("!unignorename"):
             # Only a mod is allowed to do this
@@ -158,6 +161,7 @@ class Bot(twitchio.Client):
         if Message.author.name in self.Channels[Message.channel.name.lower()]["Ignore_Names"]:
             return
 
+        #print(Message.content)
         # Giving a reaction to hello benderbot
         if Message.content.lower().startswith(tuple(self.HelloSenteces)):
             await Message.channel.send(f"ALO {Message.author.name}!")
@@ -177,13 +181,13 @@ class Bot(twitchio.Client):
                 # await Message.channel.send(f"ALO {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist. 00100100")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
-    
+
         elif Message.content.lower().find("wordbenderbot") != -1: # Using -1 as validation. find() gives -1 if the value isn't found
             if not self.Channels[Message.channel.name.lower()]["Settings"]["Degen_Mode"]:
                 await Message.channel.send(f"ALO {Message.author.name}, i am a friendly bot! I say everythin you say but with a slight twist.")
             else:
                 await Message.channel.send(self.DegenResponse(Message))
-         
+
         # Ignoring the crybabies
         elif Message.content.startswith("!ignoremenowandforeverhere"):
             # Only a streamer is allowed to do this
@@ -229,7 +233,7 @@ class Bot(twitchio.Client):
         # If everything has been done, lets add the message into the list
         else:
             self.AddMessageToStack(Message)
-
+        #print(Message.content)
         # After the list has been filled with atleast if messaging is set to listed
         if self.Channels[Message.channel.name.lower()]["Settings"]["Messaging"].lower() == "listed":
             if len(self.Channels[Message.channel.name.lower()]["Messages"]) > 5 :
